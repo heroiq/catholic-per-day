@@ -1,4 +1,4 @@
-ARG PORT=3266
+ARG PORT=3000
 
 FROM node:12-alpine AS builder
 WORKDIR /app
