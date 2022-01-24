@@ -1,4 +1,4 @@
-ARG PORT=3266
+ARG PORT=3000
 
 FROM node:12-alpine AS builder
 WORKDIR /app
@@ -23,4 +23,4 @@ COPY --chown=node:node --from=builder /app/dist ./dist
 
 EXPOSE ${PORT}
 
-ENTRYPOINT ["node", "./dist/main.js"]  
+ENTRYPOINT ["node", "dist/main.js"]  
