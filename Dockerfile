@@ -23,4 +23,4 @@ COPY --chown=node:node --from=builder /app/dist ./dist
 
 EXPOSE ${PORT}
 
-ENTRYPOINT ["npm", "start"]  
+ENTRYPOINT ["node", "dist/main.js"]  
