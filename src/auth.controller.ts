@@ -11,10 +11,7 @@ export class AuthController {
   }
 
   @Get('twitter-callback')
-  async handleCallback(
-    @Query('state') state: string,
-    @Query('code') code: string,
-  ): Promise<string> {
+  async handleCallback(@Query('state') state: string, @Query('code') code: string): Promise<string> {
     try {
       await this.auth.handleCallback(state, code);
       return 'success';

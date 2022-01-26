@@ -10,10 +10,9 @@ const redirectUri = `${baseUrl}/twitter-callback`;
 export class AuthService {
   async generateAuthLink(): Promise<string> {
     const client = new TwitterApi({ clientId, clientSecret });
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(
-      redirectUri,
-      { scope: ['tweet.read', 'tweet.write', 'users.read', 'offline.access'] },
-    );
+    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(redirectUri, {
+      scope: ['tweet.read', 'tweet.write', 'users.read', 'offline.access'],
+    });
 
     // store codeVerifier and state for later
     const firestore = new Firestore();
@@ -33,12 +32,7 @@ export class AuthService {
     const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
     const appConfig = (await appConfigDoc.get()).data() as AppConfig;
 
-    if (
-      !code ||
-      !state ||
-      !appConfig.auth.codeVerifier ||
-      !appConfig.auth.state
-    ) {
+    if (!code || !state || !appConfig.auth.codeVerifier || !appConfig.auth.state) {
       throw new Error('You denied the app or your session expired');
     }
 
@@ -57,5 +51,23 @@ export class AuthService {
     appConfig.auth.accessToken = loginResult.accessToken;
     appConfig.auth.refreshToken = loginResult.refreshToken;
     await appConfigDoc.update(appConfig);
+  }
+
+  async refreshTwitterAccessToken(): Promise<TwitterApi> {
+    // get current refresh token
+    const firestore = new Firestore();
+    const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
+    const appConfig = (await appConfigDoc.get()).data() as AppConfig;
+
+    // refresh access token
+    const twitter = new TwitterApi({ clientId, clientSecret });
+    const result = await twitter.refreshOAuth2Token(appConfig.auth.refreshToken);
+
+    // update access token and refresh token in DB
+    appConfig.auth.refreshToken = result.refreshToken;
+    appConfig.auth.accessToken = result.accessToken;
+
+    // return access token
+    return result.client;
   }
 }
