@@ -30,6 +30,7 @@ export class AppService {
     ];
 
     logger.info('tweeting thread');
+    logger.info(tweets);
     await twitter.tweetThread(tweets, (tweet) => logger.info(tweet));
   }
 }
