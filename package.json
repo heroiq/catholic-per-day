@@ -27,7 +27,7 @@
     "@nestjs/platform-express": "^8.2.6",
     "bunyan": "^1.8.15",
     "dotenv": "^14.3.2",
-    "get-catholic-daily-readings": "^1.2.0",
+    "get-catholic-daily-readings": "^1.2.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.2",
