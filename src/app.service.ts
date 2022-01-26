@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { getCatholicDailyReadings } from 'get-catholic-daily-readings';
 import { buildTweets, TwitterAutoThreadClient } from 'twitter-auto-thread';
+import { logger } from './logger';
 
 @Injectable()
 export class AppService {
@@ -12,15 +13,15 @@ export class AppService {
   }
 
   async tweetDailyReadings(): Promise<void> {
-    console.log('refreshing twitter access token');
+    logger.info('refreshing twitter access token');
     const twitterBase = await this.auth.refreshTwitterAccessToken();
 
-    console.log('getting daily readings');
+    logger.info('getting daily readings');
     const readings = await getCatholicDailyReadings();
 
     const twitter = new TwitterAutoThreadClient(twitterBase);
 
-    console.log('building tweets');
+    logger.info('building tweets');
     const tweets = [
       ...buildTweets(`${readings.header}\nLectionary: ${readings.lectionary}`),
       ...readings.readings.flatMap((r) => {
@@ -28,7 +29,7 @@ export class AppService {
       }),
     ];
 
-    console.log('tweeting thread');
+    logger.info('tweeting thread');
     await twitter.tweetThread(tweets);
   }
 }

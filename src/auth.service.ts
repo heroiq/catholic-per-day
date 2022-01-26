@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { TwitterApi } from 'twitter-api-v2';
 import { AppConfig } from './app-config';
 import { baseUrl, clientId, clientSecret } from './config';
+import { logger } from './logger';
 
 const redirectUri = `${baseUrl}/twitter-callback`;
 
@@ -55,19 +56,24 @@ export class AuthService {
 
   async refreshTwitterAccessToken(): Promise<TwitterApi> {
     // get current refresh token
+    logger.info('get current refresh token');
     const firestore = new Firestore();
     const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
     const appConfig = (await appConfigDoc.get()).data() as AppConfig;
 
     // refresh access token
+    logger.info('refresh access token');
     const twitter = new TwitterApi({ clientId, clientSecret });
     const result = await twitter.refreshOAuth2Token(appConfig.auth.refreshToken);
 
     // update access token and refresh token in DB
+    logger.info('updating tokens in DB');
     appConfig.auth.refreshToken = result.refreshToken;
     appConfig.auth.accessToken = result.accessToken;
+    await appConfigDoc.update(appConfig);
 
     // return access token
+    logger.info('token refresh successful');
     return result.client;
   }
 }
