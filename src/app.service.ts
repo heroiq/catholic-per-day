@@ -12,10 +12,15 @@ export class AppService {
   }
 
   async tweetDailyReadings(): Promise<void> {
+    console.log('refreshing twitter access token');
     const twitterBase = await this.auth.refreshTwitterAccessToken();
+
+    console.log('getting daily readings');
     const readings = await getCatholicDailyReadings();
+
     const twitter = new TwitterAutoThreadClient(twitterBase);
 
+    console.log('building tweets');
     const tweets = [
       ...buildTweets(`${readings.header}\nLectionary: ${readings.lectionary}`),
       ...readings.readings.flatMap((r) => {
@@ -23,6 +28,7 @@ export class AppService {
       }),
     ];
 
+    console.log('tweeting thread');
     await twitter.tweetThread(tweets);
   }
 }
