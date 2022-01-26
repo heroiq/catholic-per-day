@@ -18,6 +18,7 @@ export class AppService {
 
     logger.info('getting daily readings');
     const readings = await getCatholicDailyReadings();
+    logger.info(readings);
 
     const twitter = new TwitterAutoThreadClient(twitterBase);
 
