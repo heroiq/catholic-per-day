@@ -1,11 +1,13 @@
-import { Firestore } from '@google-cloud/firestore';
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
 import { TwitterApi } from 'twitter-api-v2';
 import { AppConfig } from './app-config';
 import { baseUrl, clientId, clientSecret } from './config';
-import { logger } from './logger';
+import { getFirestore } from './firestore';
+import { getLogger } from './logger';
 
 const redirectUri = `${baseUrl}/twitter-callback`;
+const logger = getLogger();
 
 @Injectable()
 export class AuthService {
@@ -16,7 +18,7 @@ export class AuthService {
     });
 
     // store codeVerifier and state for later
-    const firestore = new Firestore();
+    const firestore = getFirestore();
     const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
     const appConfig = (await appConfigDoc.get()).data() as AppConfig;
 
@@ -29,7 +31,7 @@ export class AuthService {
 
   async handleCallback(state: string, code: string): Promise<void> {
     // get stored code and state
-    const firestore = new Firestore();
+    const firestore = getFirestore();
     const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
     const appConfig = (await appConfigDoc.get()).data() as AppConfig;
 
@@ -57,14 +59,32 @@ export class AuthService {
   async refreshTwitterAccessToken(): Promise<TwitterApi> {
     // get current refresh token
     logger.info('get current refresh token');
-    const firestore = new Firestore();
+    const firestore = getFirestore();
     const appConfigDoc = firestore.collection('bots').doc('catholic-per-day');
     const appConfig = (await appConfigDoc.get()).data() as AppConfig;
 
     // refresh access token
     logger.info('refresh access token');
-    const twitter = new TwitterApi({ clientId, clientSecret });
-    const result = await twitter.refreshOAuth2Token(appConfig.auth.refreshToken);
+    const id = clientId;
+    const secret = clientSecret;
+    const twitter = new TwitterApi({ clientId: id, clientSecret: secret });
+    const token = appConfig.auth.refreshToken;
+
+    // const cuntfuck = await axios.post('https://api.twitter.com/oauth2/token', {
+    //   refresh_token: token,
+    //   grant_type: 'refresh_token',
+    //   client_id: id,
+    //   client_secret: secret,
+    // });
+
+    // const fuckface = await twitter.post('https://api.twitter.com/oauth2/token', {
+    //   refresh_token: token,
+    //   grant_type: 'refresh_token',
+    //   client_id: id,
+    //   client_secret: secret,
+    // });
+
+    const result = await twitter.refreshOAuth2Token(token);
 
     // update access token and refresh token in DB
     logger.info('updating tokens in DB');
