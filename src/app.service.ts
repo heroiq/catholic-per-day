@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { getCatholicDailyReadings } from 'get-catholic-daily-readings';
 import { buildTweets, TwitterAutoThreadClient } from 'twitter-auto-thread';
 import { getLogger } from './logger';
+import { format } from 'date-fns';
 
 const logger = getLogger();
 
@@ -19,14 +20,16 @@ export class AppService {
     const twitterBase = await this.auth.refreshTwitterAccessToken();
 
     logger.info('getting daily readings');
-    const readings = await getCatholicDailyReadings(date);
+    const rawDate = date ?? new Date();
+    const tzDate = new Date(rawDate.valueOf() + rawDate.getTimezoneOffset() * 60 * 1000);
+    const readings = await getCatholicDailyReadings(tzDate);
     logger.info(readings);
 
     const twitter = new TwitterAutoThreadClient(twitterBase);
 
     logger.info('building tweets');
     const tweets = [
-      ...buildTweets(`${readings.header}\nLectionary: ${readings.lectionary}`),
+      ...buildTweets(`${format(tzDate, 'PPPP')}\n${readings.header}\nLectionary: ${readings.lectionary}`),
       ...readings.readings.flatMap((r) => {
         return [...buildTweets(`${r.header}\n${r.reference}`), ...buildTweets(r.formattedText)];
       }),
