@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -10,8 +10,9 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post('tweets')
-  async tweet(): Promise<void> {
-    await this.appService.tweetDailyReadings();
+  @Post('tweets/:date')
+  async tweet(@Param('date') date: string): Promise<void> {
+    const runDate = !!date ? new Date(date) : null;
+    await this.appService.tweetDailyReadings(runDate);
   }
 }
