@@ -34,7 +34,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.3",
     "twitter-api-v2": "^1.10.0",
-    "twitter-auto-thread": "^1.2.4"
+    "twitter-auto-thread": "^1.2.6"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.2.0",
